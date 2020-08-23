@@ -1,6 +1,6 @@
-import { GemType } from './gem-type.enum';
+import { GemType } from '../gem-type.enum';
 import { IsNotEmpty } from 'class-validator';
-export class Gem {
+export class CreateGemDto {
   id?: string;
   @IsNotEmpty()
   name: string;
@@ -9,5 +9,4 @@ export class Gem {
   description: string;
   @IsNotEmpty()
   imageUrl: string;
-  referenceUrls: string[];
 }

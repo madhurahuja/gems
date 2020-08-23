@@ -1,47 +1,37 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Gem } from './gem.model';
+import { CreateGemDto } from './dto/create-gem.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { GemsFilterDto } from './dto/get-gems-filter.dto';
+import { GemRepository } from './gem.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Gem } from './gem.entity';
 
 @Injectable()
 export class GemsService {
-  private gems: Gem[] = [];
-  getAllGems(): Gem[] {
-    return this.gems;
+  constructor(
+    @InjectRepository(GemRepository)
+    private gemRepository: GemRepository
+  ) {}
+
+  async getGems(filterDto: GemsFilterDto): Promise<Gem[]> {
+    return this.gemRepository.getGems(filterDto);
   }
 
-  getGemsWithFilters(filterDto: GemsFilterDto): Gem[] {
-    const gems = this.getAllGems();
-    const { name, type } = filterDto;
-    if (name) {
-      return gems.filter((gem) => gem.name.includes(name));
-    }
-
-    if (type) {
-      console.log(type);
-      return gems.filter((gem) => gem.type === type);
-    }
-    return this.gems;
+  async createGem(createGemDto: CreateGemDto): Promise<Gem> {
+    return this.gemRepository.createGem(createGemDto);
   }
 
-  createGem(gem: Gem): Gem {
-    gem.id = uuidv4();
-    this.gems.push(gem);
-    return gem;
-  }
-
-  getGemById(id: string): Gem {
-    const found = this.gems.find((gem) => gem.id === id);
+  async getGemById(id: number): Promise<Gem> {
+    const found = await this.gemRepository.findOne(id);
     if (!found) {
-      throw new NotFoundException();
+      throw new NotFoundException(`Gem with ID ${id} not found!`);
     }
     return found;
   }
-
-  deleteGem(id: string): void {
-    const found = this.getGemById(id);
-    if (found) {
-      this.gems = this.gems.filter((gem) => gem.id !== id);
+  async deleteGem(id: number): Promise<void> {
+    const result = await this.gemRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Gem with ID ${id} not found!`);
     }
   }
 }
