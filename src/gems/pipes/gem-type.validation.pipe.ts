@@ -5,8 +5,10 @@ import { CreateGemDto } from '../dto/create-gem.dto';
 export class GemTypeValidationPipe implements PipeTransform {
   readonly allowedGemTypes = [GemType.CINEMATIC.toString()];
   transform(value: CreateGemDto): any {
-    if (this.allowedGemTypes.indexOf(value.type.toString()) === -1) {
-      throw new BadRequestException(`${value.type} is invalid Gem Type!`);
+    if (value && value.type) {
+      if (this.allowedGemTypes.indexOf(value.type) === -1) {
+        throw new BadRequestException(`${value.type} is invalid Gem Type!`);
+      }
     }
     return value;
   }

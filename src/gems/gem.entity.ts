@@ -1,5 +1,6 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { GemType } from './gem-type.enum';
+import { User } from 'src/auth/user.entity';
 
 @Entity()
 export class Gem extends BaseEntity {
@@ -17,4 +18,10 @@ export class Gem extends BaseEntity {
 
   @Column()
   imageUrl: string;
+
+  @ManyToOne((type) => User, (user) => user.gems, { eager: false })
+  user: User;
+
+  @Column()
+  userId: number;
 }
