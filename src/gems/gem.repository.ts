@@ -3,9 +3,11 @@ import { Gem } from './gem.entity';
 import { CreateGemDto } from './dto/create-gem.dto';
 import { GemsFilterDto } from './dto/get-gems-filter.dto';
 import { User } from 'src/auth/user.entity';
+import { Logger, InternalServerErrorException } from '@nestjs/common';
 
 @EntityRepository(Gem)
 export class GemRepository extends Repository<Gem> {
+  private logger = new Logger('GemRepository');
   async getGems(filterDto: GemsFilterDto, user: User): Promise<Gem[]> {
     const { name, type } = filterDto;
     const query = this.createQueryBuilder('gem');
@@ -20,9 +22,18 @@ export class GemRepository extends Repository<Gem> {
       query.andWhere('gem.type=:type', { type });
     }
 
-    const gems = await query.getMany();
-    return gems;
+    try {
+      const gems = await query.getMany();
+      return gems;
+    } catch (error) {
+      this.logger.error(
+        `Failed to get gems for the user: ${user.username}. Filter: ${JSON.stringify(filterDto)}`,
+        error.stack
+      );
+      throw new InternalServerErrorException();
+    }
   }
+
   async createGem(createGemDto: CreateGemDto, user: User): Promise<Gem> {
     console.log(user);
     const { name, type, description, imageUrl } = createGemDto;
@@ -33,9 +44,17 @@ export class GemRepository extends Repository<Gem> {
     gem.imageUrl = imageUrl;
     gem.user = user;
 
-    await gem.save();
-    delete gem.user;
+    try {
+      await gem.save();
+      delete gem.user;
 
-    return gem;
+      return gem;
+    } catch (error) {
+      this.logger.error(
+        `Failed to create gem for the user: ${user.username}. Data" ${JSON.stringify(createGemDto)}`,
+        error.stack
+      );
+      throw new InternalServerErrorException();
+    }
   }
 }

@@ -10,6 +10,7 @@ import {
   ValidationPipe,
   ParseIntPipe,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { GemsService } from './gems.service';
 import { CreateGemDto } from './dto/create-gem.dto';
@@ -22,9 +23,11 @@ import { GetUser } from 'src/auth/get-user.decorator';
 @Controller('gems')
 @UseGuards(AuthGuard())
 export class GemsController {
+  private logger = new Logger('GemsController');
   constructor(private gemsService: GemsService) {}
   @Get()
   getGems(@Query() filterDto: GemsFilterDto, @GetUser() user: User): Promise<Gem[]> {
+    this.logger.verbose(`User ${user.username} retreving all gems. Filters: ${JSON.stringify(filterDto)}`);
     return this.gemsService.getGems(filterDto, user);
   }
   @Post()
