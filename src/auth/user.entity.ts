@@ -1,6 +1,6 @@
 import { BaseEntity, Entity, PrimaryGeneratedColumn, PrimaryColumn, Column, Unique, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Gem } from 'src/gems/gem.entity';
+import { Gem } from '../gems/gem.entity';
 @Entity()
 @Unique(['username'])
 export class User extends BaseEntity {
